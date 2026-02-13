@@ -56,11 +56,15 @@ PostgreSQL 14+ (если запуск без Docker)
 ## Запуск проекта c Docker Compose
 
 **Клонировать репозиторий:**  
+```bash
 git clone https://github.com/Nastia-N/bank-cards.git  
 cd bank-cards
+```
 
 **Запустить контейнеры:**  
-docker-compose up -d  
+```bash
+docker-compose up -d
+```
 
 Проверить работу сервиса:  
 Основной сервис: http://localhost:8080/api  
@@ -68,20 +72,28 @@ Swagger UI (документация API): http://localhost:8080/api/swagger-ui/
 OpenAPI JSON: http://localhost:8080/api/api-docs  
 
 **Остановить контейнеры:**  
+```bash
 docker-compose down
+```
 
 ## Сборка и запуск без Docker
 
 **Установите PostgreSQL и создайте базу данных:**  
+```sql   
 CREATE DATABASE bank_cards_db;
+```
 
 **Настройте подключение в src/main/resources/application.yml** (при необходимости)
 
 **Соберите проект:**  
+```bash
 mvn clean package
+```
 
 **Запустите приложение:**  
-java -jar target/Bank_REST-1.0.0.jar  
+```bash
+java -jar target/Bank_REST-1.0.0.jar
+```
 Учетные данные для входа:  
 **Администратор** (предустановлен через Liquibase):  
 Логин: admin  
@@ -96,3 +108,4 @@ POST /api/auth/register
 002-create-cards-table.yaml — создание таблицы карт  
 003-create-transfers-table.yaml — создание таблицы переводов  
 004-insert-admin-user.yaml — добавление администратора
+

@@ -36,15 +36,17 @@ RESTful сервис для управления банковскими карт
 
 ## Технический стек
 
-**Backend:** Java 17, Spring Boot, Spring Security, Spring Data JPA  
-**База данных:** PostgreSQL  
-**Сборка:** Maven  
-**Миграции:** Liquibase  
-**Тестирование:** JUnit 5, Mockito  
-**Контейнеризация:** Docker, Docker Compose  
-**Документация:** Swagger UI (OpenAPI 3.0)  
-**Безопасность:** JWT, BCrypt, AES  
-**Утилиты:** Lombok
+| Компонент | Технологии |
+|-----------|------------|
+| **Backend** | Java 17, Spring Boot, Spring Security, Spring Data JPA |
+| **База данных** | PostgreSQL |
+| **Сборка** | Maven |
+| **Миграции** | Liquibase |
+| **Тестирование** | JUnit 5, Mockito |
+| **Контейнеризация** | Docker, Docker Compose |
+| **Документация** | Swagger UI (OpenAPI 3.0) |
+| **Безопасность** | JWT, BCrypt, AES |
+| **Утилиты** | Lombok |
 
 ## Системные требования
 
@@ -104,8 +106,11 @@ POST /api/auth/register
 ## Миграции БД (Liquibase)
 
 **Миграции автоматически применяются при запуске приложения:**  
-001-create-users-table.yaml — создание таблицы пользователей  
-002-create-cards-table.yaml — создание таблицы карт  
-003-create-transfers-table.yaml — создание таблицы переводов  
-004-insert-admin-user.yaml — добавление администратора
+| Компонент | Описание |
+|-----------|----------|
+| `001-create-users-table.yaml` | Создание таблицы пользователей |
+| `002-create-cards-table.yaml` | Создание таблицы карт |
+| `003-create-transfers-table.yaml` | Создание таблицы переводов |
+| `004-insert-admin-user.yaml` | Добавление администратора |
+
 

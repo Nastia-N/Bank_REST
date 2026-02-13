@@ -109,12 +109,6 @@ public class CardService {
         return cardRepository.save(card);
     }
 
-    public Card addFunds(Long cardId, Long userId, BigDecimal amount) {
-        Card card = getCardAndValidateOwnership(cardId, userId);
-        card.setBalance(card.getBalance().add(amount));
-        return cardRepository.save(card);
-    }
-
     @Transactional(readOnly = true)
     public BigDecimal getCardBalance(Long cardId, Long userId) {
         Card card = getCardAndValidateOwnership(cardId, userId);

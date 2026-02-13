@@ -137,25 +137,6 @@ public class CardController {
         ));
     }
 
-    @Operation(summary = "Пополнить баланс карты",
-            description = "Добавляет средства на карту")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Баланс успешно пополнен",
-                    content = @Content(schema = @Schema(implementation = CardResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Неверная сумма пополнения"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован"),
-            @ApiResponse(responseCode = "403", description = "Карта принадлежит другому пользователю"),
-            @ApiResponse(responseCode = "404", description = "Карта не найдена")
-    })
-    @PostMapping("/cards/{cardId}/deposit")
-    public ResponseEntity<CardResponse> deposit(
-            @PathVariable Long cardId,
-            @RequestParam BigDecimal amount,
-            @CurrentUser CustomUserDetails currentUser) {
-        Card card = cardService.addFunds(cardId, currentUser.getId(), amount);
-        return ResponseEntity.ok(CardResponse.fromEntity(card));
-    }
-
     @Operation(summary = "Перевод между своими картами",
             description = "Переводит средства с одной карты пользователя на другую")
     @ApiResponses(value = {

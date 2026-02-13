@@ -114,3 +114,5 @@ POST /api/auth/register
 | `004-insert-admin-user.yaml` | Добавление администратора |
 
 
+
+

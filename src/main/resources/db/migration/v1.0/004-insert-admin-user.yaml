@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-insert-admin-user
+      author: developer
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO users (username, email, password, role, created_at)
+              SELECT 'admin',
+                     'admin@bank.com',
+                     '$2a$10$NlW9Hda.Y8OovyM3n4RPTeHPpnl0SEdZGP2KeAPQxo2TSFY9a3xv.',
+                     'ADMIN',
+                     NOW()
+              WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin');
+      rollback:
+        - sql:
+            sql: DELETE FROM users WHERE username = 'admin';

@@ -113,28 +113,6 @@ POST /api/auth/register
 | `003-create-transfers-table.yaml` | Создание таблицы переводов |
 | `004-insert-admin-user.yaml` | Добавление администратора |
 
-## Развертывание в Kubernetes
-
-### Предварительные требования
-- Установленный kubectl
-- Kubernetes кластер (локально Minikube или Docker Desktop)
-
-### Запуск в Kubernetes
-
-```bash
-# Применить все манифесты
-kubectl apply -f k8s/
-
-# Проверить статус подов
-kubectl get pods
-
-# Проверить сервисы
-kubectl get services
-
-# Получить URL для доступа к приложению (для Minikube)
-minikube service bank-cards-service --url
-```
-
 ## CI/CD Pipeline
 Проект использует GitHub Actions для автоматической сборки и тестирования.
 

@@ -28,9 +28,9 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               value: postgres
             - name: JWT_SECRET
-              value: "your-256-bit-secret-key-for-jwt-signature-change-in-production"
+              value: "my-super-secret-jwt-key-32-bytes-long"
             - name: ENCRYPTION_SECRET
-              value: "BankCardsKey12345678"
+              value: "BankCardsKey1234"
           resources:
             requests:
               memory: "512Mi"
@@ -38,15 +38,3 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /api/actuator/health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /api/actuator/health/readiness
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 5

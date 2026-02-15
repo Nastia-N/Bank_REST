@@ -14,11 +14,14 @@ servers:
     description: Generated server url
 security:
   - bearerAuth: []
+tags:
+  - name: Admin Controller
+    description: Управление пользователями и картами (только для ADMIN)
 paths:
   /admin/users/{userId}/role:
     put:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Изменить роль пользователя
       description: Изменяет роль пользователя (USER/ADMIN). Только для ADMIN
       operationId: updateUserRole
@@ -49,29 +52,29 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Пользователь не найден
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/cards/{cardId}/status:
     put:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Изменить статус карты
       description: Блокирует или активирует карту. Только для ADMIN
       operationId: updateCardStatus
@@ -90,6 +93,10 @@ paths:
           required: true
           schema:
             type: string
+            enum:
+              - ACTIVE
+              - BLOCKED
+              - EXPIRED
           example: BLOCKED
       responses:
         '200':
@@ -103,31 +110,30 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Карта не найдена
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /user/transfers:
     post:
       tags:
         - card-controller
       summary: Перевод между своими картами
-      description: Переводит средства с одной карты пользователя на другую
       operationId: transfer
       requestBody:
         content:
@@ -141,39 +147,31 @@ paths:
           content:
             '*/*':
               schema:
-                type: string
+                $ref: '#/components/schemas/TransferResponse'
         '400':
           description: Недостаточно средств, карта неактивна или перевод на ту же карту
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Одна из карт принадлежит другому пользователю
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Карта не найдена
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
+                $ref: '#/components/schemas/ErrorResponse'
   /user/cards:
     get:
       tags:
@@ -202,19 +200,25 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/Page'
+                $ref: '#/components/schemas/PageCardResponse'
+        '400':
+          description: Неверные параметры запроса
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
         - card-controller
@@ -239,7 +243,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
@@ -251,15 +255,17 @@ paths:
       tags:
         - card-controller
       summary: Заблокировать карту
-      description: Переводит карту в статус BLOCKED
+      description: Переводит карту в статус BLOCKED. Доступна только для своих карт
       operationId: blockCard
       parameters:
         - name: cardId
           in: path
+          description: ID карты для блокировки
           required: true
           schema:
             type: integer
             format: int64
+          example: 1
       responses:
         '200':
           description: Карта успешно заблокирована
@@ -272,7 +278,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
@@ -296,15 +302,17 @@ paths:
       tags:
         - card-controller
       summary: Активировать карту
-      description: Переводит карту в статус ACTIVE
+      description: Переводит карту в статус ACTIVE. Доступна только для своих карт
       operationId: activateCard
       parameters:
         - name: cardId
           in: path
+          description: ID карты для активации
           required: true
           schema:
             type: integer
             format: int64
+          example: 1
       responses:
         '200':
           description: Карта успешно активирована
@@ -317,7 +325,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
@@ -361,7 +369,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/JwtResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/login:
     post:
       tags:
@@ -382,6 +390,12 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/JwtResponse'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Неверное имя пользователя или пароль
           content:
@@ -391,7 +405,7 @@ paths:
   /admin/users/{userId}/cards:
     get:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Получить карты пользователя
       description: >-
         Возвращает список карт указанного пользователя с пагинацией и поиском.
@@ -424,34 +438,34 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/Page'
+                $ref: '#/components/schemas/PageCardResponse'
         '400':
           description: Неверный ID пользователя или параметры запроса
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен - требуется роль ADMIN
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Пользователь не найден
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Создать карту для пользователя
       description: >-
         Создает новую карту для указанного пользователя. Номер генерируется
@@ -484,31 +498,30 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Пользователь не найден
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/CardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /user/cards/{cardId}/balance:
     get:
       tags:
         - card-controller
       summary: Получить баланс карты
-      description: Возвращает текущий баланс карты
       operationId: getCardBalance
       parameters:
         - name: cardId
@@ -523,35 +536,35 @@ paths:
           content:
             '*/*':
               schema:
-                type: string
+                $ref: '#/components/schemas/BalanceResponse'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Карта принадлежит другому пользователю
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Карта не найдена
           content:
             '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/users:
     get:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Получить всех пользователей
       description: >-
         Возвращает список всех пользователей с пагинацией и поиском. Только для
@@ -579,22 +592,28 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageUserResponse'
+        '400':
+          description: Неверные параметры запроса
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageUserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен - требуется роль ADMIN
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageUserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/users/{userId}:
     get:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Получить пользователя по ID
       description: Возвращает детальную информацию о пользователе. Только для ADMIN
       operationId: getUserById
@@ -614,27 +633,33 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Неверный ID пользователя
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Пользователь не найден
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Удалить пользователя
       description: >-
         Удаляет пользователя из системы. Все карты пользователя также будут
@@ -652,16 +677,34 @@ paths:
       responses:
         '204':
           description: Пользователь успешно удален
+        '400':
+          description: Неверный ID пользователя
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Пользователь не найден
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/cards:
     get:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Получить все карты
       description: >-
         Возвращает список всех карт в системе с пагинацией и поиском. Только для
@@ -686,23 +729,29 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/Page'
+                $ref: '#/components/schemas/PageCardResponse'
+        '400':
+          description: Неверные параметры запроса
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен - требуется роль ADMIN
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/PageCardResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/cards/{cardId}:
     delete:
       tags:
-        - admin-controller
+        - Admin Controller
       summary: Удалить карту
       description: Удаляет карту из системы. Только для ADMIN
       operationId: deleteCard
@@ -718,14 +767,67 @@ paths:
       responses:
         '204':
           description: Карта успешно удалена
+        '400':
+          description: Неверный ID карты
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Не авторизован
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Доступ запрещен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Карта не найдена
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: Время возникновения ошибки
+          format: date-time
+        status:
+          type: integer
+          description: HTTP статус код
+          format: int32
+          example: 400
+        error:
+          type: string
+          description: Тип ошибки
+          example: Bad Request
+        message:
+          type: string
+          description: Сообщение об ошибке
+          example: 'User not found with id: 1'
+        path:
+          type: string
+          description: Путь запроса
+          example: /api/users/1
+        validationErrors:
+          type: object
+          additionalProperties:
+            type: string
+            description: Детальные ошибки валидации (поле -> сообщение)
+            example: '{"username":"Username is required","email":"Invalid email format"}'
+          description: Детальные ошибки валидации (поле -> сообщение)
+          example:
+            username: Username is required
+            email: Invalid email format
+      description: Ответ с информацией об ошибке
     UpdateRoleRequest:
       required:
         - role
@@ -733,6 +835,8 @@ components:
       properties:
         role:
           type: string
+          description: Новая роль пользователя
+          example: ADMIN
           enum:
             - USER
             - ADMIN
@@ -742,39 +846,68 @@ components:
       properties:
         id:
           type: integer
+          description: ID пользователя
           format: int64
+          example: 1
         username:
           type: string
+          description: Имя пользователя (уникальное)
+          example: john_doe
         email:
           type: string
+          description: Email пользователя (уникальный)
+          example: john@example.com
         role:
           type: string
+          description: Роль пользователя в системе
+          example: USER
           enum:
             - USER
             - ADMIN
         createdAt:
           type: string
+          description: Дата и время регистрации
           format: date-time
+      description: Ответ с данными пользователя
     CardResponse:
       type: object
       properties:
         id:
           type: integer
+          description: ID карты
           format: int64
+          example: 1
         cardNumberMasked:
           type: string
+          description: Маскированный номер карты
+          example: '**** **** **** 1234'
         cardHolderName:
           type: string
+          description: Имя владельца на карте
+          example: IVAN PETROV
         expirationDate:
           type: string
+          description: Срок действия
           format: date
+          example: '2025-12-31'
         status:
           type: string
+          description: Статус карты
+          example: ACTIVE
+          enum:
+            - ACTIVE
+            - BLOCKED
+            - EXPIRED
         balance:
           type: number
+          description: Баланс
+          example: 15000.5
         userId:
           type: integer
+          description: ID владельца карты
           format: int64
+          example: 1
+      description: Ответ с данными банковской карты
     TransferRequest:
       required:
         - amount
@@ -784,14 +917,52 @@ components:
       properties:
         fromCardId:
           type: integer
+          description: ID карты, с которой списываются средства
           format: int64
+          example: 1
         toCardId:
           type: integer
+          description: ID карты, на которую зачисляются средства
           format: int64
+          example: 2
         amount:
           minimum: 0.01
           exclusiveMinimum: false
           type: number
+          description: Сумма перевода (минимум 0.01)
+          example: 1000.5
+      description: Запрос на перевод средств между картами
+    TransferResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Сообщение о результате
+          example: Transfer completed successfully
+        transferId:
+          type: integer
+          description: ID перевода
+          format: int64
+          example: 1
+        amount:
+          type: number
+          description: Сумма перевода
+          example: 1000.5
+        fromCardId:
+          type: integer
+          description: ID карты отправителя
+          format: int64
+          example: 1
+        toCardId:
+          type: integer
+          description: ID карты получателя
+          format: int64
+          example: 2
+        timestamp:
+          type: string
+          description: Время перевода
+          format: date-time
+      description: Ответ на перевод средств
     CardRequest:
       required:
         - cardHolderName
@@ -817,33 +988,68 @@ components:
           maxLength: 50
           minLength: 3
           type: string
+          description: Имя пользователя (уникальное)
+          example: john_doe
         email:
           type: string
+          description: Email пользователя (уникальный)
+          example: john@example.com
         password:
           maxLength: 2147483647
           minLength: 6
           type: string
+          description: Пароль (минимум 6 символов)
+          example: password123
         role:
           type: string
+          description: Роль пользователя (по умолчанию USER)
+          example: USER
           enum:
             - USER
             - ADMIN
+          default: USER
+      description: Запрос на регистрацию пользователя
     JwtResponse:
+      required:
+        - email
+        - id
+        - role
+        - token
+        - type
+        - username
       type: object
       properties:
         token:
           type: string
+          description: JWT токен для доступа к защищенным ресурсам
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ
         type:
           type: string
+          description: Тип токена (всегда Bearer)
+          example: Bearer
+          default: Bearer
         id:
           type: integer
+          description: ID пользователя
           format: int64
+          example: 1
         username:
           type: string
+          description: Имя пользователя
+          example: john_doe
         email:
           type: string
+          description: Email пользователя
+          example: john@example.com
         role:
           type: string
+          description: Роль пользователя
+          example: USER
+          enum:
+            - USER
+            - ADMIN
+      description: Ответ с JWT токеном после успешной аутентификации
     LoginRequest:
       required:
         - password
@@ -852,8 +1058,14 @@ components:
       properties:
         username:
           type: string
+          description: Имя пользователя
+          example: john_doe
         password:
+          minLength: 6
           type: string
+          description: Пароль
+          example: password123
+      description: Запрос на вход в систему
     Pageable:
       type: object
       properties:
@@ -869,141 +1081,109 @@ components:
           type: array
           items:
             type: string
-    Page:
-      type: object
-      properties:
-        totalPages:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
-        numberOfElements:
-          type: integer
-          format: int32
-        size:
-          type: integer
-          format: int32
-        content:
-          type: array
-          items:
-            type: object
-        number:
-          type: integer
-          format: int32
-        sort:
-          type: array
-          items:
-            $ref: '#/components/schemas/SortObject'
-        empty:
-          type: boolean
-    PageableObject:
-      type: object
-      properties:
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
-        pageNumber:
-          type: integer
-          format: int32
-        pageSize:
-          type: integer
-          format: int32
-        offset:
-          type: integer
-          format: int64
-        sort:
-          type: array
-          items:
-            $ref: '#/components/schemas/SortObject'
-    SortObject:
-      type: object
-      properties:
-        direction:
-          type: string
-        nullHandling:
-          type: string
-        ascending:
-          type: boolean
-        property:
-          type: string
-        ignoreCase:
-          type: boolean
     PageCardResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
-        numberOfElements:
-          type: integer
-          format: int32
-        size:
-          type: integer
-          format: int32
         content:
           type: array
+          description: Список карт на текущей странице
           items:
             $ref: '#/components/schemas/CardResponse'
         number:
           type: integer
+          description: Номер текущей страницы (начиная с 0)
           format: int32
-        sort:
-          type: array
-          items:
-            $ref: '#/components/schemas/SortObject'
-        empty:
+          example: 0
+        size:
+          type: integer
+          description: Размер страницы
+          format: int32
+          example: 10
+        totalElements:
+          type: integer
+          description: Общее количество элементов
+          format: int64
+          example: 25
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          format: int32
+          example: 3
+        hasNext:
           type: boolean
+          description: Есть ли следующая страница
+          example: true
+        hasPrevious:
+          type: boolean
+          description: Есть ли предыдущая страница
+          example: false
+        first:
+          type: boolean
+          description: Первая ли это страница
+          example: true
+        last:
+          type: boolean
+          description: Последняя ли это страница
+          example: false
+      description: Страница с картами
+    BalanceResponse:
+      type: object
+      properties:
+        cardId:
+          type: integer
+          description: ID карты
+          format: int64
+          example: 1
+        balance:
+          type: number
+          description: Текущий баланс
+          example: 1500.5
+      description: Ответ с балансом карты
     PageUserResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
-        numberOfElements:
-          type: integer
-          format: int32
-        size:
-          type: integer
-          format: int32
         content:
           type: array
+          description: Список пользователей на текущей странице
           items:
             $ref: '#/components/schemas/UserResponse'
         number:
           type: integer
+          description: Номер текущей страницы (начиная с 0)
           format: int32
-        sort:
-          type: array
-          items:
-            $ref: '#/components/schemas/SortObject'
-        empty:
+          example: 0
+        size:
+          type: integer
+          description: Размер страницы
+          format: int32
+          example: 10
+        totalElements:
+          type: integer
+          description: Общее количество элементов
+          format: int64
+          example: 25
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          format: int32
+          example: 3
+        hasNext:
           type: boolean
+          description: Есть ли следующая страница
+          example: true
+        hasPrevious:
+          type: boolean
+          description: Есть ли предыдущая страница
+          example: false
+        first:
+          type: boolean
+          description: Первая ли это страница
+          example: true
+        last:
+          type: boolean
+          description: Последняя ли это страница
+          example: false
+      description: Страница с пользователями
   securitySchemes:
     bearerAuth:
       type: http
@@ -1011,4 +1191,3 @@ components:
       in: header
       scheme: bearer
       bearerFormat: JWT
-

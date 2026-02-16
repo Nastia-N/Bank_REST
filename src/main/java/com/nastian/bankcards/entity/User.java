@@ -1,36 +1,29 @@
 package com.nastian.bankcards.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
-
-/**
- * Сущность пользователя системы.
- * <p>
- * Содержит учетные данные пользователя:
- * <ul>
- *   <li>Уникальное имя пользователя (для входа)</li>
- *   <li>Уникальный email</li>
- *   <li>Зашифрованный пароль</li>
- *   <li>Роль (USER/ADMIN)</li>
- *   <li>Дата регистрации</li>
- * </ul>
- */
 
 @Entity
 @Table(name = "users", indexes = {
         @Index(name = "idx_user_username", columnList = "username")
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(unique = true, nullable = false, length = 50)
@@ -40,6 +33,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @ToString.Exclude
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -52,5 +46,16 @@ public class User {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", role=" + role +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

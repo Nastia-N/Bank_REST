@@ -1,33 +1,32 @@
 package com.nastian.bankcards.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-/**
- * Сущность банковской карты.
- * <p>
- * Хранит информацию о карте: зашифрованный номер, маскированный номер для отображения,
- * срок действия, статус, баланс и владельца карты.
- */
 
 @Entity
 @Table(name = "cards", indexes = {
         @Index(name = "idx_card_user", columnList = "user_id"),
         @Index(name = "idx_card_status", columnList = "status")
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "card_number_encrypted", nullable = false)
@@ -51,6 +50,7 @@ public class Card {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
     private User user;
 
     @Column(name = "created_at")
@@ -59,5 +59,17 @@ public class Card {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Card{" +
+                "id=" + id +
+                ", cardNumberMasked='" + cardNumberMasked + '\'' +
+                ", cardHolderName='" + cardHolderName + '\'' +
+                ", expirationDate=" + expirationDate +
+                ", status=" + status +
+                ", balance=" + balance +
+                '}';
     }
 }

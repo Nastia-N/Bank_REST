@@ -2,6 +2,14 @@ databaseChangeLog:
   - changeSet:
       id: 003-create-transfers-table
       author: developer
+      preConditions:
+        - onFail: MARK_RAN
+        - and:
+            - tableExists:
+                tableName: cards
+            - not:
+                tableExists:
+                  tableName: transfers
       changes:
         - createTable:
             tableName: transfers

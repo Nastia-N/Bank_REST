@@ -1,17 +1,28 @@
 databaseChangeLog:
-  - changeSet:
-      id: 004-insert-admin-user
-      author: developer
-      changes:
-        - sql:
-            sql: |
-              INSERT INTO users (username, email, password, role, created_at)
-              SELECT 'admin',
-                     'admin@bank.com',
-                     '$2a$10$NlW9Hda.Y8OovyM3n4RPTeHPpnl0SEdZGP2KeAPQxo2TSFY9a3xv.',
-                     'ADMIN',
-                     NOW()
-              WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin');
-      rollback:
-        - sql:
-            sql: DELETE FROM users WHERE username = 'admin';
+  changeSet:
+    id: 004-insert-admin-user
+    author: developer
+    preConditions:
+      - onFail: MARK_RAN
+      - sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM users WHERE username = 'admin'
+    changes:
+      - insert:
+          tableName: users
+          columns:
+            - column:
+                name: username
+                value: admin
+            - column:
+                name: email
+                value: admin@bank.com
+            - column:
+                name: password
+                value: "$2a$10$NlW9Hda.Y8OovyM3n4RPTeHPpnl0SEdZGP2KeAPQxo2TSFY9a3xv."
+            - column:
+                name: role
+                value: ADMIN
+            - column:
+                name: created_at
+                valueComputed: CURRENT_TIMESTAMP
